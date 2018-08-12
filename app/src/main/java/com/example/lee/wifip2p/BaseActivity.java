@@ -13,12 +13,15 @@ import java.util.Collection;
 
 import broadcast.WifiBroadcast;
 import listener.onWifiP2pListener;
+import utils.ThreadPoolUtils;
 
 public class BaseActivity extends Activity implements onWifiP2pListener {
     
     private Context context = BaseActivity.this;
 
     private static final String TAG = "BaseActivity";
+
+    private ThreadPoolUtils threadPoolUtils;
 
     private WifiBroadcast broadcast;
 
@@ -38,6 +41,9 @@ public class BaseActivity extends Activity implements onWifiP2pListener {
         super.onDestroy();
         if (broadcast != null) {
             unregisterReceiver(broadcast);
+        }
+        if (threadPoolUtils != null) {
+            threadPoolUtils.shutDown();
         }
     }
 
