@@ -1,5 +1,6 @@
 package com.example.lee.wifip2p;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,13 +16,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -95,12 +93,11 @@ public class SendFileActivity extends BaseActivity {
                                     Toast.makeText(context, "文件不存在", Toast.LENGTH_SHORT).show();
                                     return;
                                 }
-                                InputStream is = new FileInputStream(file);
                                 String address = wifiP2pInfo.groupOwnerAddress.getHostAddress();
-                                sendFile(is,address);
+                                sendFile(file,address);
                             }
                         }
-                    } catch (FileNotFoundException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                     break;
@@ -108,36 +105,38 @@ public class SendFileActivity extends BaseActivity {
         }
     }
 
-    private void sendFile(InputStream is,String address) {
-        try {
-            SendUtils utils = new SendUtils(is,address);
-            utils.startSend(new onSendProgress() {
-                @Override
-                public void onStart() {
-
-                }
-
-                @Override
-                public void onProgress(int progress) {
-
-                }
-
-                @Override
-                public void onFailed() {
-
-                }
-
-                @Override
-                public void onFinish() {
-
-                }
-            });
-            if (is != null) {
-                is.close();
+    private void sendFile(File file,String address) {
+        AlertDialog.Builder dialog = new AlertDialog.Builder(context);
+        dialog.setTitle("传输进度");
+        dialog.setCancelable(false);
+        final ProgressBar bar = new ProgressBar(context,null,android.R.attr.progressBarStyleHorizontal);
+        bar.setMax(100);
+        bar.setProgress(0);
+        dialog.setView(bar);
+        final AlertDialog dia = dialog.create();
+        dia.show();
+        SendUtils utils = new SendUtils(file,address);
+        utils.startSend(new onSendProgress() {
+            @Override
+            public void onStart() {
+                Log.d(TAG, "onStart: 传输通道准备完成，开始发送");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+            @Override
+            public void onProgress(int progress) {
+                Log.d(TAG, "onProgress: 传输进度："+progress);
+                bar.setProgress(progress);
+            }
+            @Override
+            public void onFailed() {
+                Log.d(TAG, "onFailed: 传输失败");
+                dia.dismiss();
+            }
+            @Override
+            public void onFinish() {
+                Log.d(TAG, "onFinish: 传输完成");
+                dia.dismiss();
+            }
+        });
     }
 
     private void discoveryDevice() {

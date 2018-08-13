@@ -6,7 +6,7 @@ package listener;
 
 public interface onReceiverProgress {
 
-    void onStart();
+    void onBegin();
 
     void onProgress(int progress);
 
