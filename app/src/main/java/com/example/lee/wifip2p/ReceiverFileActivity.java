@@ -1,5 +1,6 @@
 package com.example.lee.wifip2p;
 
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
@@ -11,6 +12,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,6 +31,10 @@ public class ReceiverFileActivity extends BaseActivity {
     private Context context = ReceiverFileActivity.this;
 
     private ReceiverService.MyBinder mBinder;
+    
+    private AlertDialog.Builder dialog;
+    private AlertDialog dia;
+    private ProgressBar bar;
 
     @BindView(R.id.createGroup)
     Button createGroup;
@@ -94,22 +100,30 @@ public class ReceiverFileActivity extends BaseActivity {
     public onReceiverProgress listener = new onReceiverProgress() {
         @Override
         public void onBegin() {
-
+            Log.d(TAG, "onBegin: 开始接收文件");
+            dialog = new AlertDialog.Builder(context);
+            bar = new ProgressBar(context,null,android.R.attr.progressBarStyleHorizontal);
+            bar.setMax(100);
+            bar.setProgress(0);
+            dialog.setView(bar);
+            dia = dialog.create();
+            dia.show();
         }
 
         @Override
         public void onProgress(int progress) {
-
+            Log.d(TAG, "onProgress: 接收进度："+progress);
+            bar.setProgress(progress);
         }
 
         @Override
         public void onFailed() {
-
+            Log.d(TAG, "onFailed: 接收失败");
         }
 
         @Override
         public void onFinish() {
-
+            Log.d(TAG, "onFinish: 接收成功");
         }
     };
 }
